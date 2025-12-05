@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Universal Flashcards</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .offline-container {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 40px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .offline-icon {
+            font-size: 100px;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .status {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+
+        .status-text {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .status-online {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .status-offline {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        .retry-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .retry-button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .retry-button:active {
+            transform: translateY(0);
+        }
+
+        .features {
+            text-align: left;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+
+        .features h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .features ul {
+            list-style: none;
+        }
+
+        .features li {
+            color: #666;
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .cache-info {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">📚</div>
+        <h1>You're Offline</h1>
+        <p>No internet connection detected. Don't worry, your flashcards are still available!</p>
+
+        <div class="status">
+            <p class="status-text">
+                Connection Status: <span id="connection-status" class="status-offline">Offline</span>
+            </p>
+        </div>
+
+        <div class="features">
+            <h3>What you can still do:</h3>
+            <ul>
+                <li>Access previously loaded flashcards</li>
+                <li>Continue your learning session</li>
+                <li>All your progress is saved locally</li>
+                <li>Changes will sync when you're back online</li>
+            </ul>
+        </div>
+
+        <button class="retry-button" onclick="retryConnection()">Try Again</button>
+
+        <p class="cache-info">
+            This app works offline thanks to Progressive Web App technology
+        </p>
+    </div>
+
+    <script>
+        // Check online status
+        function updateConnectionStatus() {
+            const statusElement = document.getElementById('connection-status');
+            if (navigator.onLine) {
+                statusElement.textContent = 'Online';
+                statusElement.className = 'status-online';
+                // If back online, redirect to main app
+                setTimeout(() => {
+                    window.location.href = './flashcard.html';
+                }, 1000);
+            } else {
+                statusElement.textContent = 'Offline';
+                statusElement.className = 'status-offline';
+            }
+        }
+
+        // Listen for online/offline events
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+
+        // Initial check
+        updateConnectionStatus();
+
+        // Retry connection
+        function retryConnection() {
+            updateConnectionStatus();
+            if (navigator.onLine) {
+                window.location.href = './flashcard.html';
+            } else {
+                alert('Still offline. Please check your internet connection and try again.');
+            }
+        }
+
+        // Auto-retry every 30 seconds
+        setInterval(() => {
+            if (navigator.onLine) {
+                window.location.href = './flashcard.html';
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
