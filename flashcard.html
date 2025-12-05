@@ -4,8 +4,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Flashcards v2.5 - Cloud Sync</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E📚%3C/text%3E%3C/svg%3E">
+    <title>Universal Flashcards - PWA</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="./manifest.json">
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="./icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-192x192.png">
+
+    <!-- Theme Colors -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Flashcards">
+
+    <!-- Description -->
+    <meta name="description" content="Mobile-responsive language learning flashcard app with offline support, cloud sync, and multi-language TTS">
+
     <style>
         * {
             margin: 0;
@@ -11975,6 +11995,53 @@
             </div>
         </div>
     </div>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        // Register Service Worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registered successfully:', registration.scope);
+
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            console.log('🔄 Service Worker update found');
+
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('✅ New version available! Refresh to update.');
+                                }
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.warn('⚠️ Service Worker registration failed:', error);
+                    });
+            });
+        } else {
+            console.warn('⚠️ Service Workers not supported in this browser');
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('💡 PWA Install prompt available');
+            e.preventDefault();
+            deferredPrompt = e;
+
+            // You can show your custom install button here
+            // For now, browser will show its own install UI
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ PWA installed successfully!');
+            deferredPrompt = null;
+        });
+    </script>
 
 </body>
 </html>
