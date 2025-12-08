@@ -1,0 +1,30 @@
+# Documentation (except README.md)
+*.md
+!README.md
+
+# docs folders
+docs/
+docs-pwa/
+
+# Backup files
+*_backup*.html
+flashcard_backup*.html
+
+# Development files
+generate_icons.py
+*.pyc
+__pycache__/
+
+# Server files
+*.log
+server_pid.txt
+PUSH_TO_GITHUB.sh
+
+# Test files
+test_*.html
+test_*.csv
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
