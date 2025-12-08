@@ -1,10 +1,10 @@
 /*
  * Universal Flashcards PWA - Service Worker
- * Version: 3.4.0 - Mobile Optimized for All Devices
+ * Version: 3.5.0 - Mobile Install Button + Decryption Fix
  * Provides offline functionality, caching, and background sync
  */
 
-const CACHE_VERSION = 'v3.4.0';
+const CACHE_VERSION = 'v3.5.0';
 const CACHE_NAME = `flashcards-pwa-${CACHE_VERSION}`;
 
 // Assets to cache immediately on install

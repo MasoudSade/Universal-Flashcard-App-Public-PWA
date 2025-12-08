@@ -3413,6 +3413,43 @@
     </div>
 
     <div class="container">
+        <!-- PWA Install Prompt (Hidden by default) -->
+        <div id="pwaInstallBanner" style="display: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); animation: slideDown 0.5s ease-out;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 700; font-size: 1.1em; margin-bottom: 5px;">📱 Install App</div>
+                    <div style="font-size: 0.9em; opacity: 0.95;">Add to your home screen for quick access and offline use</div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button id="pwaInstallBtn" onclick="installPWA()" style="background: white; color: #059669; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95em; transition: all 0.3s; white-space: nowrap;">
+                        ✓ Install
+                    </button>
+                    <button onclick="dismissInstallBanner()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 0.95em; transition: all 0.3s;">
+                        ✕
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- iOS Install Instructions Modal -->
+        <div id="iosInstallModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10001; justify-content: center; align-items: center;">
+            <div style="background: white; border-radius: 20px; padding: 30px; max-width: 400px; margin: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                <h3 style="color: #667eea; margin-bottom: 20px; text-align: center;">📱 Install on iOS</h3>
+                <div style="text-align: left; line-height: 1.8; color: #333;">
+                    <p style="margin-bottom: 15px; font-weight: 600;">To install this app on iPhone/iPad:</p>
+                    <ol style="padding-left: 20px;">
+                        <li style="margin-bottom: 10px;">Tap the <strong>Share button</strong> <span style="display: inline-block; padding: 3px 8px; background: #007AFF; color: white; border-radius: 5px; font-size: 0.9em;">↑</span> at the bottom of Safari</li>
+                        <li style="margin-bottom: 10px;">Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+                        <li style="margin-bottom: 10px;">Tap <strong>"Add"</strong> to confirm</li>
+                    </ol>
+                    <p style="margin-top: 15px; font-size: 0.9em; color: #666;">The app will appear on your home screen like a native app!</p>
+                </div>
+                <button onclick="closeIOSInstructions()" style="width: 100%; margin-top: 20px; background: #667eea; color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 1em;">
+                    Got it!
+                </button>
+            </div>
+        </div>
+
         <!-- Header with Hamburger Menu -->
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px;">
             <!-- Hamburger Menu Button -->
@@ -14046,6 +14083,143 @@
         });
 
         console.log('✅ Transcript mode functions initialized!');
+
+        // ============================================
+        // PWA INSTALL PROMPT HANDLING
+        // ============================================
+
+        let deferredPrompt = null;
+
+        // Detect if app is installable
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('📱 PWA installable detected');
+
+            // Prevent the default mini-infobar
+            e.preventDefault();
+
+            // Store the event for later use
+            deferredPrompt = e;
+
+            // Show our custom install banner (but not if already dismissed)
+            const dismissedTime = localStorage.getItem('pwaInstallDismissed');
+            const now = Date.now();
+            const oneDayMs = 24 * 60 * 60 * 1000;
+
+            // Show banner if never dismissed OR dismissed more than 1 day ago
+            if (!dismissedTime || (now - parseInt(dismissedTime)) > oneDayMs) {
+                showInstallBanner();
+            }
+        });
+
+        // Show install banner
+        function showInstallBanner() {
+            const banner = document.getElementById('pwaInstallBanner');
+            if (banner) {
+                banner.style.display = 'block';
+                console.log('✅ Install banner shown');
+            }
+        }
+
+        // Install PWA
+        async function installPWA() {
+            // Check if running on iOS
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+            if (isIOS) {
+                // Show iOS-specific instructions
+                showIOSInstructions();
+                return;
+            }
+
+            if (!deferredPrompt) {
+                console.log('❌ Install prompt not available');
+                alert('Install is not available. Please use your browser\'s menu to install this app.');
+                return;
+            }
+
+            // Show the install prompt
+            deferredPrompt.prompt();
+
+            // Wait for user choice
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`PWA install choice: ${outcome}`);
+
+            if (outcome === 'accepted') {
+                console.log('✅ PWA installed successfully');
+            } else {
+                console.log('❌ PWA install declined');
+            }
+
+            // Clear the prompt
+            deferredPrompt = null;
+
+            // Hide banner
+            hideInstallBanner();
+        }
+
+        // Dismiss install banner
+        function dismissInstallBanner() {
+            hideInstallBanner();
+            // Remember dismissal for 1 day
+            localStorage.setItem('pwaInstallDismissed', Date.now().toString());
+            console.log('📌 Install banner dismissed');
+        }
+
+        // Hide install banner
+        function hideInstallBanner() {
+            const banner = document.getElementById('pwaInstallBanner');
+            if (banner) {
+                banner.style.display = 'none';
+            }
+        }
+
+        // Show iOS install instructions
+        function showIOSInstructions() {
+            const modal = document.getElementById('iosInstallModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                console.log('📱 iOS install instructions shown');
+            }
+        }
+
+        // Close iOS instructions
+        function closeIOSInstructions() {
+            const modal = document.getElementById('iosInstallModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            // Also hide the banner
+            hideInstallBanner();
+        }
+
+        // Check if already installed (running as PWA)
+        window.addEventListener('load', () => {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                                window.navigator.standalone === true;
+
+            if (isStandalone) {
+                console.log('✅ App running as PWA');
+                // Hide install banner if running as installed app
+                hideInstallBanner();
+            } else {
+                console.log('🌐 App running in browser');
+
+                // Check if on iOS and show banner with iOS instructions
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                if (isIOS) {
+                    // iOS doesn't fire beforeinstallprompt, so show banner manually
+                    const dismissedTime = localStorage.getItem('pwaInstallDismissed');
+                    const now = Date.now();
+                    const oneDayMs = 24 * 60 * 60 * 1000;
+
+                    if (!dismissedTime || (now - parseInt(dismissedTime)) > oneDayMs) {
+                        setTimeout(() => showInstallBanner(), 3000); // Show after 3 seconds
+                    }
+                }
+            }
+        });
+
+        console.log('✅ PWA install handlers initialized');
     </script>
 
     <!-- Focus Mode Overlay -->
