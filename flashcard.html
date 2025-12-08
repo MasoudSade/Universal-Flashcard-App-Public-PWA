@@ -7410,6 +7410,19 @@
 
                     return JSON.parse(decompressed);
                 } else {
+                    // Try to detect if data is compressed without version marker (legacy compressed data)
+                    // Check for gzip magic number (0x1f 0x8b) at start
+                    if (decryptedArray.length > 2 && decryptedArray[0] === 0x1f && decryptedArray[1] === 0x8b) {
+                        console.log('🗜️  Detected gzip compressed data (no version marker), decompressing...');
+                        try {
+                            const decompressed = pako.inflate(decryptedArray, { to: 'string' });
+                            console.log(`✅ Decompressed successfully (${(decompressed.length / 1024).toFixed(2)}KB)`);
+                            return JSON.parse(decompressed);
+                        } catch (decompressError) {
+                            console.error('❌ Decompression failed, trying as uncompressed:', decompressError);
+                        }
+                    }
+
                     // OLD FORMAT: Uncompressed data (backward compatible)
                     console.log('📄 Detected uncompressed data (legacy format)');
 
