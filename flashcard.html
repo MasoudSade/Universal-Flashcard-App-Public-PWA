@@ -3,7 +3,10 @@
 <!-- ✅ PRODUCTION VERSION - Cloud-First Storage Fix - Dec 4 2025 -->
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Universal Flashcards v2.5 - Cloud Sync</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E📚%3C/text%3E%3C/svg%3E">
     <style>
@@ -11,6 +14,23 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            /* Remove tap highlight on mobile */
+            -webkit-tap-highlight-color: transparent;
+            /* Smooth scrolling on iOS */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Root variables for safe area (notched devices) */
+        :root {
+            --safe-area-inset-top: env(safe-area-inset-top, 0px);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-area-inset-left: env(safe-area-inset-left, 0px);
+            --safe-area-inset-right: env(safe-area-inset-right, 0px);
+        }
+
+        /* Prevent pull-to-refresh on mobile */
+        html, body {
+            overscroll-behavior-y: contain;
         }
 
         body {
@@ -21,6 +41,11 @@
             justify-content: center;
             align-items: flex-start;
             padding: 20px;
+            /* Add safe area padding for notched devices */
+            padding-top: max(20px, var(--safe-area-inset-top));
+            padding-bottom: max(20px, var(--safe-area-inset-bottom));
+            padding-left: max(20px, var(--safe-area-inset-left));
+            padding-right: max(20px, var(--safe-area-inset-right));
             overflow-y: auto;
         }
 
@@ -33,6 +58,51 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             margin-top: 20px;
             margin-bottom: 40px;
+        }
+
+        /* ============================================ */
+        /* MOBILE TOUCH OPTIMIZATIONS */
+        /* ============================================ */
+
+        /* Better touch responsiveness for all interactive elements */
+        button,
+        input[type="button"],
+        input[type="submit"],
+        input[type="file"],
+        .btn,
+        .nav-button,
+        .reveal-btn,
+        .audio-btn,
+        .audio-btn-lang2,
+        .transcript-btn,
+        .transcript-pair,
+        a {
+            touch-action: manipulation; /* Prevents double-tap zoom delay */
+            -webkit-user-select: none;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        /* Allow text selection in inputs and text areas */
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        input[type="search"],
+        textarea {
+            touch-action: manipulation;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        /* Active state feedback for touch */
+        button:active,
+        .btn:active,
+        .nav-button:active,
+        .reveal-btn:active,
+        .audio-btn:active,
+        .audio-btn-lang2:active {
+            transform: scale(0.97);
+            opacity: 0.9;
         }
 
         /* Management Side Panel */
@@ -1972,10 +2042,86 @@
 
         /* Landscape mobile */
         @media (max-height: 500px) and (orientation: landscape) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                margin-top: 5px;
+                margin-bottom: 20px;
+                padding: 15px;
+            }
+
             .card-lang1-section,
             .card-lang2-section {
                 max-height: 120px;
                 overflow-y: auto;
+                padding: 10px;
+            }
+
+            .card-content {
+                font-size: 1.2em !important;
+            }
+
+            .management-panel {
+                max-height: 100vh;
+                overflow-y: auto;
+            }
+        }
+
+        /* Extra small devices (iPhone SE, small Android) */
+        @media (max-width: 375px) {
+            body {
+                padding: 10px 5px;
+            }
+
+            .container {
+                padding: 12px 8px;
+                border-radius: 15px;
+            }
+
+            h1 {
+                font-size: 1.2em !important;
+            }
+
+            .card-content {
+                font-size: 1.3em !important;
+                padding: 10px;
+            }
+
+            .card-label {
+                font-size: 0.6em !important;
+            }
+
+            .nav-button {
+                padding: 8px 12px !important;
+                font-size: 0.8em !important;
+            }
+
+            .audio-btn, .audio-btn-lang2 {
+                width: 42px !important;
+                height: 42px !important;
+                font-size: 1.1em !important;
+            }
+
+            .reveal-btn {
+                padding: 8px 12px !important;
+                font-size: 0.75em !important;
+            }
+
+            /* Management panel takes full width on very small screens */
+            .management-panel {
+                max-width: 95vw !important;
+                width: 95vw !important;
+            }
+
+            /* Modal adjustments */
+            .modal-content {
+                padding: 15px 10px !important;
+            }
+
+            .transcript-text {
+                font-size: 0.95em !important;
             }
         }
 
