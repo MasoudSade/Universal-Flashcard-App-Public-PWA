@@ -4655,6 +4655,43 @@
             console.log('Default Source Voice:', sourceVoice ? sourceVoice.name : 'None');
             console.log('Default Target Voice:', targetVoice ? targetVoice.name : 'None');
             console.log('Total voices available:', sortedVoices.length);
+
+            // Re-apply saved voice settings if user is logged in and has settings
+            if (isCloudEnabled && cloudUser && Object.keys(userSettings).length > 0) {
+                console.log('🔄 Re-applying saved voice settings now that voices are loaded...');
+                const currentMode = flashcardViewMode === 'transcript' ? 'transcriptMode' : 'cardMode';
+                const settings = userSettings[currentMode];
+
+                // Restore source voice
+                if (settings.sourceVoiceName) {
+                    const foundVoice = allVoices.find(v => v.name === settings.sourceVoiceName);
+                    if (foundVoice) {
+                        sourceVoice = foundVoice;
+                        const voiceIndex = sortedVoices.indexOf(foundVoice);
+                        const sourceVoiceSelect = document.getElementById('sourceVoiceSelect');
+                        if (sourceVoiceSelect && voiceIndex >= 0) {
+                            sourceVoiceSelect.value = voiceIndex;
+                            updateVoiceInfo('source', foundVoice);
+                            console.log(`✅ Restored source voice: ${foundVoice.name}`);
+                        }
+                    }
+                }
+
+                // Restore target voice
+                if (settings.targetVoiceName) {
+                    const foundVoice = allVoices.find(v => v.name === settings.targetVoiceName);
+                    if (foundVoice) {
+                        targetVoice = foundVoice;
+                        const voiceIndex = sortedVoices.indexOf(foundVoice);
+                        const targetVoiceSelect = document.getElementById('targetVoiceSelect');
+                        if (targetVoiceSelect && voiceIndex >= 0) {
+                            targetVoiceSelect.value = voiceIndex;
+                            updateVoiceInfo('target', foundVoice);
+                            console.log(`✅ Restored target voice: ${foundVoice.name}`);
+                        }
+                    }
+                }
+            }
         }
 
         // Update voice info display
@@ -11712,11 +11749,22 @@
                         console.log('   Using temporary default category (not saved yet)');
                     }
 
-                    updateStats(); // This calls saveProgress() which saves flashcards to localStorage
+                    updateStats(); // Updates UI counters only
                     showFlashcard();
                     updateCurrentFileDisplay();
 
-                    console.log('💾 Flashcards saved to localStorage:', currentFileName, flashcards.length, 'cards');
+                    // CLOUD MODE: Cache flashcard data in memory only (no localStorage)
+                    if (isCloudEnabled) {
+                        const jsonData = JSON.stringify(flashcards);
+                        cloudDataCache[currentFileName] = jsonData;
+                        console.log(`☁️ Cached ${currentFileName} in memory (${flashcards.length} cards, ${(jsonData.length / 1024).toFixed(2)}KB)`);
+                        console.log('   Data stored in cloudDataCache (will sync to cloud on next save)');
+                    } else {
+                        // NO CLOUD: Save to localStorage only
+                        const jsonData = JSON.stringify(flashcards);
+                        safeStorage.setItem(`flashcards_${currentFileName}`, jsonData);
+                        console.log('💾 Flashcards saved to localStorage:', currentFileName, flashcards.length, 'cards');
+                    }
 
                     // NOW show category suggestion AFTER flashcards are saved
                     console.log('🔍 Checking for pending category suggestion...');
