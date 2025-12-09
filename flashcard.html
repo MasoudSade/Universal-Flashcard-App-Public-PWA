@@ -10689,7 +10689,7 @@
             document.body.appendChild(indicator);
         }
 
-        function loadProgress(fileName) {
+        function loadFlashcardProgress(fileName) {
             // CLOUD-FIRST MODE: Check memory cache first
             if (isCloudFirstMode && cloudDataCache[fileName]) {
                 console.log(`☁️ Loading ${fileName} from memory cache`);
@@ -11584,7 +11584,7 @@
                 }
 
                 // Continue with actual parsing
-                const savedProgress = loadProgress(currentFileName);
+                const savedProgress = loadFlashcardProgress(currentFileName);
 
                 // Check if first line is a header
                 let startIndex = 0;
