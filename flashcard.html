@@ -3,7 +3,10 @@
 <!-- ✅ PRODUCTION VERSION - Cloud-First Storage Fix - Dec 4 2025 -->
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Universal Flashcards v2.5 - Cloud Sync</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E📚%3C/text%3E%3C/svg%3E">
     <style>
@@ -11,6 +14,23 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            /* Remove tap highlight on mobile */
+            -webkit-tap-highlight-color: transparent;
+            /* Smooth scrolling on iOS */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Root variables for safe area (notched devices) */
+        :root {
+            --safe-area-inset-top: env(safe-area-inset-top, 0px);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-area-inset-left: env(safe-area-inset-left, 0px);
+            --safe-area-inset-right: env(safe-area-inset-right, 0px);
+        }
+
+        /* Prevent pull-to-refresh on mobile */
+        html, body {
+            overscroll-behavior-y: contain;
         }
 
         body {
@@ -21,6 +41,11 @@
             justify-content: center;
             align-items: flex-start;
             padding: 20px;
+            /* Add safe area padding for notched devices */
+            padding-top: max(20px, var(--safe-area-inset-top));
+            padding-bottom: max(20px, var(--safe-area-inset-bottom));
+            padding-left: max(20px, var(--safe-area-inset-left));
+            padding-right: max(20px, var(--safe-area-inset-right));
             overflow-y: auto;
         }
 
@@ -33,6 +58,51 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             margin-top: 20px;
             margin-bottom: 40px;
+        }
+
+        /* ============================================ */
+        /* MOBILE TOUCH OPTIMIZATIONS */
+        /* ============================================ */
+
+        /* Better touch responsiveness for all interactive elements */
+        button,
+        input[type="button"],
+        input[type="submit"],
+        input[type="file"],
+        .btn,
+        .nav-button,
+        .reveal-btn,
+        .audio-btn,
+        .audio-btn-lang2,
+        .transcript-btn,
+        .transcript-pair,
+        a {
+            touch-action: manipulation; /* Prevents double-tap zoom delay */
+            -webkit-user-select: none;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        /* Allow text selection in inputs and text areas */
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        input[type="search"],
+        textarea {
+            touch-action: manipulation;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        /* Active state feedback for touch */
+        button:active,
+        .btn:active,
+        .nav-button:active,
+        .reveal-btn:active,
+        .audio-btn:active,
+        .audio-btn-lang2:active {
+            transform: scale(0.97);
+            opacity: 0.9;
         }
 
         /* Management Side Panel */
@@ -1972,10 +2042,86 @@
 
         /* Landscape mobile */
         @media (max-height: 500px) and (orientation: landscape) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                margin-top: 5px;
+                margin-bottom: 20px;
+                padding: 15px;
+            }
+
             .card-lang1-section,
             .card-lang2-section {
                 max-height: 120px;
                 overflow-y: auto;
+                padding: 10px;
+            }
+
+            .card-content {
+                font-size: 1.2em !important;
+            }
+
+            .management-panel {
+                max-height: 100vh;
+                overflow-y: auto;
+            }
+        }
+
+        /* Extra small devices (iPhone SE, small Android) */
+        @media (max-width: 375px) {
+            body {
+                padding: 10px 5px;
+            }
+
+            .container {
+                padding: 12px 8px;
+                border-radius: 15px;
+            }
+
+            h1 {
+                font-size: 1.2em !important;
+            }
+
+            .card-content {
+                font-size: 1.3em !important;
+                padding: 10px;
+            }
+
+            .card-label {
+                font-size: 0.6em !important;
+            }
+
+            .nav-button {
+                padding: 8px 12px !important;
+                font-size: 0.8em !important;
+            }
+
+            .audio-btn, .audio-btn-lang2 {
+                width: 42px !important;
+                height: 42px !important;
+                font-size: 1.1em !important;
+            }
+
+            .reveal-btn {
+                padding: 8px 12px !important;
+                font-size: 0.75em !important;
+            }
+
+            /* Management panel takes full width on very small screens */
+            .management-panel {
+                max-width: 95vw !important;
+                width: 95vw !important;
+            }
+
+            /* Modal adjustments */
+            .modal-content {
+                padding: 15px 10px !important;
+            }
+
+            .transcript-text {
+                font-size: 0.95em !important;
             }
         }
 
@@ -3267,6 +3413,43 @@
     </div>
 
     <div class="container">
+        <!-- PWA Install Prompt (Hidden by default) -->
+        <div id="pwaInstallBanner" style="display: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); animation: slideDown 0.5s ease-out;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 700; font-size: 1.1em; margin-bottom: 5px;">📱 Install App</div>
+                    <div style="font-size: 0.9em; opacity: 0.95;">Add to your home screen for quick access and offline use</div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button id="pwaInstallBtn" onclick="installPWA()" style="background: white; color: #059669; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95em; transition: all 0.3s; white-space: nowrap;">
+                        ✓ Install
+                    </button>
+                    <button onclick="dismissInstallBanner()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 0.95em; transition: all 0.3s;">
+                        ✕
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- iOS Install Instructions Modal -->
+        <div id="iosInstallModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10001; justify-content: center; align-items: center;">
+            <div style="background: white; border-radius: 20px; padding: 30px; max-width: 400px; margin: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                <h3 style="color: #667eea; margin-bottom: 20px; text-align: center;">📱 Install on iOS</h3>
+                <div style="text-align: left; line-height: 1.8; color: #333;">
+                    <p style="margin-bottom: 15px; font-weight: 600;">To install this app on iPhone/iPad:</p>
+                    <ol style="padding-left: 20px;">
+                        <li style="margin-bottom: 10px;">Tap the <strong>Share button</strong> <span style="display: inline-block; padding: 3px 8px; background: #007AFF; color: white; border-radius: 5px; font-size: 0.9em;">↑</span> at the bottom of Safari</li>
+                        <li style="margin-bottom: 10px;">Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+                        <li style="margin-bottom: 10px;">Tap <strong>"Add"</strong> to confirm</li>
+                    </ol>
+                    <p style="margin-top: 15px; font-size: 0.9em; color: #666;">The app will appear on your home screen like a native app!</p>
+                </div>
+                <button onclick="closeIOSInstructions()" style="width: 100%; margin-top: 20px; background: #667eea; color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 1em;">
+                    Got it!
+                </button>
+            </div>
+        </div>
+
         <!-- Header with Hamburger Menu -->
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px;">
             <!-- Hamburger Menu Button -->
@@ -4022,6 +4205,7 @@
                     <div class="repeat-dropdown-item" data-action="current">🔊 Replay Current Card</div>
                 </div>
             </div>
+            <button class="quick-action-btn" id="resetCardBtn" style="background: #06b6d4; color: white;" onclick="resetToBeginning('card')" title="Reset to first card">↺ Reset</button>
             <button class="quick-action-btn" id="minimizeBtn" style="background: #06b6d4; color: white;" onclick="window.toggleMinimizeMode()" title="Minimize flashcard to corner">⬇️ Minimize</button>
             <button class="quick-action-btn" id="deleteRecordBtn" style="background: #ef4444; color: white;">🗑️ Delete</button>
         </div>
@@ -4078,9 +4262,36 @@
                 <button class="transcript-btn" onclick="remapTranscriptColumns()">
                     🎯 Remap Columns
                 </button>
+                <div class="repeat-dropdown" style="display: inline-block;">
+                    <button class="transcript-btn" id="transcriptRepeatBtn" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+                        🔁 Repeat
+                    </button>
+                    <div class="repeat-dropdown-menu" id="transcriptRepeatDropdown">
+                        <div class="repeat-dropdown-item" data-action="all">🔄 Repeat All Cards</div>
+                        <div class="repeat-dropdown-item" data-action="learned">✓ Repeat Learned Only</div>
+                        <div class="repeat-dropdown-item" data-action="unlearned">✗ Repeat Unlearned Only</div>
+                        <div class="repeat-dropdown-item" data-action="current">🔊 Replay Current Card</div>
+                    </div>
+                </div>
+                <button class="transcript-btn" onclick="resetToBeginning('transcript')" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);" title="Reset to first card">
+                    ↺ Reset
+                </button>
                 <button class="transcript-btn" onclick="deleteCurrentTranscriptCard()" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
                     🗑️ Delete Current
                 </button>
+            </div>
+
+            <!-- Transcript Navigation -->
+            <div class="navigation" id="transcriptNavigation">
+                <button class="nav-button" id="transcriptPrevBtn">← Previous</button>
+                <div class="progress" id="transcriptProgressNav">
+                    <input type="number" id="transcriptCurrentInput" min="1" value="1"
+                           style="width: 60px; text-align: center; font-size: 1.1em; font-weight: bold; border: 2px solid #667eea; border-radius: 5px; padding: 5px; background: white;"
+                           title="Enter card number to jump to" />
+                    <span style="font-weight: bold;"> / </span>
+                    <span id="transcriptTotalCards">1</span>
+                </div>
+                <button class="nav-button" id="transcriptNextBtn">Next →</button>
             </div>
 
             <!-- Transcript Progress -->
@@ -4186,6 +4397,7 @@
         let isCloudFirstMode = false; // When true, saves directly to cloud instead of localStorage
         let cloudDataCache = {}; // In-memory cache of flashcard data (for cloud-first mode)
         let pendingCloudSync = new Set(); // Track files that need to be synced to cloud (for retry logic)
+        let progressDataCache = {}; // Track position for each file (synced with Firebase)
 
         // ========================================
         // TRANSCRIPT MODE VARIABLES (New Feature)
@@ -4197,6 +4409,48 @@
         let transcriptSourceRepeat = 0; // Track current source repeat count
         let transcriptTargetRepeat = 0; // Track current target repeat count
         let transcriptTimeout = null; // For delays between languages and cards
+
+        // ========================================
+        // USER SETTINGS STORAGE (Cloud-synced)
+        // ========================================
+        let userSettings = {
+            cardMode: {
+                speechRate: 1.0,
+                speechPitch: 1.0,
+                sourceVoiceName: null,
+                targetVoiceName: null,
+                autoplayEnglishEnabled: false,
+                delayBetweenLangs: 4000,
+                delayBeforeNext: 4000,
+                repeatSourceCount: 1,
+                repeatTargetCount: 1,
+                readExtendedContent: false,
+                loopModeEnabled: false,
+                studyTimerEnabled: false,
+                sleepTimerEnabled: false,
+                studyDuration: 25,
+                sleepDuration: 30,
+                filterMode: 'all'
+            },
+            transcriptMode: {
+                speechRate: 1.0,
+                speechPitch: 1.0,
+                sourceVoiceName: null,
+                targetVoiceName: null,
+                autoplayEnglishEnabled: false,
+                delayBetweenLangs: 4000,
+                delayBeforeNext: 4000,
+                repeatSourceCount: 1,
+                repeatTargetCount: 1,
+                readExtendedContent: false,
+                loopModeEnabled: false,
+                studyTimerEnabled: false,
+                sleepTimerEnabled: false,
+                studyDuration: 25,
+                sleepDuration: 30
+            }
+        };
+        let settingsSaveTimeout = null; // Debounce timer for auto-save
 
         // ===== FIREBASE CONFIGURATION =====
         // 🔒 SECURITY NOTE: This API key is SAFE to be public!
@@ -7235,6 +7489,19 @@
 
                     return JSON.parse(decompressed);
                 } else {
+                    // Try to detect if data is compressed without version marker (legacy compressed data)
+                    // Check for gzip magic number (0x1f 0x8b) at start
+                    if (decryptedArray.length > 2 && decryptedArray[0] === 0x1f && decryptedArray[1] === 0x8b) {
+                        console.log('🗜️  Detected gzip compressed data (no version marker), decompressing...');
+                        try {
+                            const decompressed = pako.inflate(decryptedArray, { to: 'string' });
+                            console.log(`✅ Decompressed successfully (${(decompressed.length / 1024).toFixed(2)}KB)`);
+                            return JSON.parse(decompressed);
+                        } catch (decompressError) {
+                            console.error('❌ Decompression failed, trying as uncompressed:', decompressError);
+                        }
+                    }
+
                     // OLD FORMAT: Uncompressed data (backward compatible)
                     console.log('📄 Detected uncompressed data (legacy format)');
 
@@ -7414,6 +7681,9 @@
                 updateSyncStatus('synced', '☁️ Synced');
 
                 console.log('Cloud login successful');
+
+                // Load user settings from cloud
+                await loadUserSettings();
 
                 // Auto-load all flashcards from all categories
                 autoLoadAllCategories();
@@ -8209,6 +8479,7 @@
                     categories: categories,
                     fileCategories: fileCategories,
                     flashcardData: allFlashcardData,
+                    progressData: progressDataCache, // Include position tracking
                     lastSync: Date.now()
                 };
 
@@ -8461,6 +8732,7 @@
                     categories: categories,
                     fileCategories: fileCategories,
                     flashcardData: allFlashcardData,
+                    progressData: progressDataCache, // Include position tracking
                     lastSync: Date.now()
                 };
 
@@ -8545,6 +8817,8 @@
                 // Update local data
                 categories = decrypted.categories || {};
                 fileCategories = decrypted.fileCategories || {};
+                progressDataCache = decrypted.progressData || {}; // Restore progress positions from cloud
+                console.log(`📂 Restored ${Object.keys(progressDataCache).length} progress entries from Firebase`);
 
                 // Restore flashcard data
                 const flashcardData = decrypted.flashcardData || {};
@@ -9582,6 +9856,8 @@
 
         function loadFileByName(fileName) {
             console.log(`🎯 Loading file for practice: ${fileName}`);
+            console.log(`📊 BEFORE LOAD - flashcards.length: ${flashcards ? flashcards.length : 0}`);
+            console.log(`📊 BEFORE LOAD - filteredCards.length: ${filteredCards ? filteredCards.length : 0}`);
 
             // STEP 1: Clear old practice cache (switching files)
             if (currentFileName && currentFileName !== fileName) {
@@ -9655,17 +9931,44 @@
 
                 // Update UI
                 const dueCount = flashcards.filter(isDueForReview).length;
-                fileInfo.innerHTML = `<strong>📂 ${currentFileName}</strong><br>✅ Loaded ${flashcards.length} cards (${dueCount} due for review) from saved data`;
+                document.getElementById('fileInfo').innerHTML = `<strong>📂 ${currentFileName}</strong><br>✅ Loaded ${flashcards.length} cards (${dueCount} due for review) from saved data`;
 
                 updateStats();
-                showFlashcard();
                 updateCurrentFileDisplay();
 
-                // Show main UI elements
-                flashcardContainer.style.display = 'block';
-                navigation.style.display = 'flex';
-                stats.style.display = 'block';
-                document.getElementById('quickActions').style.display = 'grid';
+                // Load saved progress to resume from where user left off
+                // Note: loadProgress() calls showFlashcard() internally via applyProgress()
+                const progressLoaded = loadProgress();
+
+                // If no saved progress, show first card
+                if (!progressLoaded) {
+                    showFlashcard();
+                }
+
+                // IMPORTANT: If currently in transcript mode, regenerate the transcript view with new cards
+                if (flashcardViewMode === 'transcript') {
+                    console.log('🔄 Regenerating transcript view for new file...');
+                    generateTranscriptView();
+                    updateTranscriptProgress();
+                    highlightTranscriptPair(transcriptCurrentIndex);
+
+                    // Keep transcript mode UI visible, hide card mode UI
+                    document.getElementById('flashcardContainer').style.display = 'none';
+                    document.getElementById('navigation').style.display = 'none';
+                    document.getElementById('quickActions').style.display = 'none';
+                    document.getElementById('transcriptView').style.display = 'block';
+                    document.getElementById('transcriptNavigation').style.display = 'flex';
+                } else {
+                    // Show card mode UI, hide transcript mode UI
+                    document.getElementById('flashcardContainer').style.display = 'block';
+                    document.getElementById('navigation').style.display = 'flex';
+                    document.getElementById('quickActions').style.display = 'grid';
+                    document.getElementById('transcriptView').style.display = 'none';
+                    document.getElementById('transcriptNavigation').style.display = 'none';
+                }
+
+                // Show common UI elements
+                document.getElementById('stats').style.display = 'block';
                 document.getElementById('practiceModeBtn').style.display = 'block';
                 document.getElementById('settingsToggleBtn').style.display = 'flex';
                 document.getElementById('clearFileBtn').style.display = 'inline-block';
@@ -9687,7 +9990,7 @@
                 console.log('   ✅ Category Browser, Settings, and Upload Section auto-hidden for clean practice view');
 
                 // Scroll to flashcard
-                flashcardContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                document.getElementById('flashcardContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
             } catch (error) {
                 console.error('Error loading saved vocabulary:', error);
@@ -9944,7 +10247,7 @@
         });
 
         // LocalStorage functions
-        async function saveProgress() {
+        async function saveFlashcardsToCloud() {
             if (currentFileName && flashcards.length > 0) {
                 try {
                     const progressData = flashcards.map(card => ({
@@ -10064,6 +10367,326 @@
         // Save to storage function (used by file manager)
         function saveToStorage() {
             saveProgress();
+        }
+
+        // ========================================
+        // USER SETTINGS SAVE/LOAD FUNCTIONS
+        // ========================================
+
+        /**
+         * Capture current settings from UI into the userSettings object
+         * @param {string} mode - 'cardMode' or 'transcriptMode'
+         */
+        function captureCurrentSettings(mode) {
+            console.log(`📸 Capturing ${mode} settings...`);
+
+            const settings = userSettings[mode];
+
+            // Capture speech settings
+            settings.speechRate = speechRate;
+            settings.speechPitch = speechPitch;
+            settings.sourceVoiceName = sourceVoice ? sourceVoice.name : null;
+            settings.targetVoiceName = targetVoice ? targetVoice.name : null;
+
+            // Capture autoplay and timing settings
+            settings.autoplayEnglishEnabled = autoplayEnglishEnabled;
+            settings.delayBetweenLangs = delayBetweenLangs;
+            settings.delayBeforeNext = delayBeforeNext;
+            settings.repeatSourceCount = repeatSourceCount;
+            settings.repeatTargetCount = repeatTargetCount;
+
+            // Capture other settings
+            settings.readExtendedContent = readExtendedContent;
+            settings.loopModeEnabled = loopModeEnabled;
+            settings.studyTimerEnabled = studyTimerEnabled;
+            settings.sleepTimerEnabled = sleepTimerEnabled;
+
+            // Capture timer durations from UI
+            const studyDurationEl = document.getElementById('studyDuration');
+            const sleepDurationEl = document.getElementById('sleepDuration');
+            if (studyDurationEl) settings.studyDuration = parseInt(studyDurationEl.value);
+            if (sleepDurationEl) settings.sleepDuration = parseInt(sleepDurationEl.value);
+
+            // Capture filter mode (card mode only)
+            if (mode === 'cardMode') {
+                settings.filterMode = filterMode || 'all';
+            }
+
+            console.log(`✅ Captured ${mode} settings:`, settings);
+        }
+
+        /**
+         * Apply settings from userSettings object to current UI and variables
+         * @param {string} mode - 'cardMode' or 'transcriptMode'
+         */
+        function applySettingsToUI(mode) {
+            console.log(`🎨 Applying ${mode} settings to UI...`);
+
+            const settings = userSettings[mode];
+
+            // Apply speech settings
+            speechRate = settings.speechRate;
+            speechPitch = settings.speechPitch;
+
+            // Update UI controls
+            const speechRateEl = document.getElementById('speechRate');
+            const speechPitchEl = document.getElementById('speechPitch');
+            if (speechRateEl) {
+                speechRateEl.value = settings.speechRate;
+                document.getElementById('speechRateValue').textContent = settings.speechRate.toFixed(1) + 'x';
+            }
+            if (speechPitchEl) {
+                speechPitchEl.value = settings.speechPitch;
+                document.getElementById('speechPitchValue').textContent = settings.speechPitch.toFixed(1) + 'x';
+            }
+
+            // Apply voice selections
+            if (settings.sourceVoiceName && allVoices.length > 0) {
+                const foundVoice = allVoices.find(v => v.name === settings.sourceVoiceName);
+                if (foundVoice) {
+                    sourceVoice = foundVoice;
+                    // Update dropdown UI to reflect loaded voice
+                    const sortedVoices = [...allVoices].sort((a, b) => {
+                        if (a.name.includes('Google') && !b.name.includes('Google')) return -1;
+                        if (!a.name.includes('Google') && b.name.includes('Google')) return 1;
+                        return a.name.localeCompare(b.name);
+                    });
+                    const voiceIndex = sortedVoices.indexOf(foundVoice);
+                    const sourceVoiceSelect = document.getElementById('sourceVoiceSelect');
+                    if (sourceVoiceSelect && voiceIndex >= 0) {
+                        sourceVoiceSelect.value = voiceIndex;
+                        updateVoiceInfo('source', foundVoice);
+                        console.log(`✅ Restored source voice: ${foundVoice.name}`);
+                    }
+                }
+            }
+            if (settings.targetVoiceName && allVoices.length > 0) {
+                const foundVoice = allVoices.find(v => v.name === settings.targetVoiceName);
+                if (foundVoice) {
+                    targetVoice = foundVoice;
+                    // Update dropdown UI to reflect loaded voice
+                    const sortedVoices = [...allVoices].sort((a, b) => {
+                        if (a.name.includes('Google') && !b.name.includes('Google')) return -1;
+                        if (!a.name.includes('Google') && b.name.includes('Google')) return 1;
+                        return a.name.localeCompare(b.name);
+                    });
+                    const voiceIndex = sortedVoices.indexOf(foundVoice);
+                    const targetVoiceSelect = document.getElementById('targetVoiceSelect');
+                    if (targetVoiceSelect && voiceIndex >= 0) {
+                        targetVoiceSelect.value = voiceIndex;
+                        updateVoiceInfo('target', foundVoice);
+                        console.log(`✅ Restored target voice: ${foundVoice.name}`);
+                    }
+                }
+            }
+
+            // Apply autoplay and timing settings
+            autoplayEnglishEnabled = settings.autoplayEnglishEnabled;
+            delayBetweenLangs = settings.delayBetweenLangs;
+            delayBeforeNext = settings.delayBeforeNext;
+            repeatSourceCount = settings.repeatSourceCount;
+            repeatTargetCount = settings.repeatTargetCount;
+
+            // Update UI controls for timing
+            const autoplayCheckbox = document.getElementById('autoplayEnglish');
+            const delayBetweenEl = document.getElementById('delayBetween');
+            const delayNextEl = document.getElementById('delayNext');
+            const repeatSourceEl = document.getElementById('repeatSourceCount');
+            const repeatTargetEl = document.getElementById('repeatTargetCount');
+
+            if (autoplayCheckbox) autoplayCheckbox.checked = settings.autoplayEnglishEnabled;
+            if (delayBetweenEl) {
+                delayBetweenEl.value = settings.delayBetweenLangs;
+                document.getElementById('delayBetweenValue').textContent = (settings.delayBetweenLangs / 1000).toFixed(1) + 's';
+            }
+            if (delayNextEl) {
+                delayNextEl.value = settings.delayBeforeNext;
+                document.getElementById('delayNextValue').textContent = (settings.delayBeforeNext / 1000).toFixed(1) + 's';
+            }
+            if (repeatSourceEl) repeatSourceEl.value = settings.repeatSourceCount;
+            if (repeatTargetEl) repeatTargetEl.value = settings.repeatTargetCount;
+
+            // Apply other settings
+            readExtendedContent = settings.readExtendedContent;
+            loopModeEnabled = settings.loopModeEnabled;
+            studyTimerEnabled = settings.studyTimerEnabled;
+            sleepTimerEnabled = settings.sleepTimerEnabled;
+
+            // Update loop mode checkbox
+            const loopModeCheckbox = document.getElementById('loopMode');
+            if (loopModeCheckbox) loopModeCheckbox.checked = settings.loopModeEnabled;
+
+            // Apply timer durations
+            const studyDurationEl = document.getElementById('studyDuration');
+            const sleepDurationEl = document.getElementById('sleepDuration');
+            if (studyDurationEl) studyDurationEl.value = settings.studyDuration;
+            if (sleepDurationEl) sleepDurationEl.value = settings.sleepDuration;
+
+            // Apply filter mode (card mode only)
+            if (mode === 'cardMode' && settings.filterMode) {
+                filterMode = settings.filterMode;
+                // Update the button appearance to match the filter mode
+                const showLearnedBtn = document.getElementById('showLearnedBtn');
+                if (showLearnedBtn) {
+                    if (filterMode === 'unlearned') {
+                        showOnlyUnlearned = true;
+                        showLearnedBtn.textContent = '👁 Unlearned Only';
+                        showLearnedBtn.style.background = '#ef4444';
+                        showLearnedBtn.style.color = 'white';
+                        showLearnedBtn.classList.add('active');
+                    } else if (filterMode === 'learned') {
+                        showOnlyUnlearned = false;
+                        showLearnedBtn.textContent = '👁 Learned Only';
+                        showLearnedBtn.style.background = '#10b981';
+                        showLearnedBtn.style.color = 'white';
+                        showLearnedBtn.classList.add('active');
+                    } else {
+                        showOnlyUnlearned = false;
+                        showLearnedBtn.textContent = '👁 Show All';
+                        showLearnedBtn.style.background = '';
+                        showLearnedBtn.style.color = '';
+                        showLearnedBtn.classList.remove('active');
+                    }
+                }
+            }
+
+            console.log(`✅ Applied ${mode} settings to UI`);
+        }
+
+        /**
+         * Save user settings to cloud
+         * Debounced to avoid excessive writes
+         */
+        async function saveUserSettings() {
+            if (!isCloudEnabled || !cloudUser) {
+                console.log('⚠️ Settings not saved - cloud disabled or user not logged in');
+                return;
+            }
+
+            // Capture current mode settings before saving
+            const currentMode = flashcardViewMode === 'transcript' ? 'transcriptMode' : 'cardMode';
+            captureCurrentSettings(currentMode);
+
+            // Debounce: Clear existing timeout and set new one
+            if (settingsSaveTimeout) {
+                clearTimeout(settingsSaveTimeout);
+            }
+
+            settingsSaveTimeout = setTimeout(async () => {
+                try {
+                    console.log('💾 Saving user settings to cloud...');
+                    showSettingsSaveIndicator('saving');
+
+                    const settingsData = JSON.stringify(userSettings);
+                    const userRef = firebase.database().ref(`users-universal/${cloudUser.username}/settings`);
+                    await userRef.set(settingsData);
+
+                    console.log('✅ User settings saved to cloud');
+                    showSettingsSaveIndicator('saved');
+                } catch (error) {
+                    console.error('❌ Error saving user settings:', error);
+                    showSettingsSaveIndicator('error');
+                }
+            }, 1000); // Wait 1 second after last change before saving
+        }
+
+        /**
+         * Load user settings from cloud
+         */
+        async function loadUserSettings() {
+            if (!isCloudEnabled || !cloudUser) {
+                console.log('⚠️ Settings not loaded - cloud disabled or user not logged in');
+                return false;
+            }
+
+            try {
+                console.log('📥 Loading user settings from cloud...');
+                showSettingsSaveIndicator('loading');
+
+                const userRef = firebase.database().ref(`users-universal/${cloudUser.username}/settings`);
+                const snapshot = await userRef.once('value');
+
+                if (snapshot.exists()) {
+                    const loadedSettings = JSON.parse(snapshot.val());
+
+                    // Merge loaded settings with defaults (in case new settings were added)
+                    userSettings.cardMode = { ...userSettings.cardMode, ...loadedSettings.cardMode };
+                    userSettings.transcriptMode = { ...userSettings.transcriptMode, ...loadedSettings.transcriptMode };
+
+                    console.log('✅ User settings loaded from cloud');
+
+                    // Apply settings for current mode
+                    const currentMode = flashcardViewMode === 'transcript' ? 'transcriptMode' : 'cardMode';
+                    applySettingsToUI(currentMode);
+
+                    showSettingsSaveIndicator('loaded');
+                    return true;
+                } else {
+                    console.log('ℹ️ No saved settings found - using defaults');
+                    showSettingsSaveIndicator('');
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Error loading user settings:', error);
+                showSettingsSaveIndicator('error');
+                return false;
+            }
+        }
+
+        /**
+         * Show visual indicator for settings save/load status
+         */
+        function showSettingsSaveIndicator(status) {
+            const statsEl = document.getElementById('stats');
+            if (!statsEl) return;
+
+            // Remove existing indicator
+            let indicator = document.getElementById('settingsSaveIndicator');
+            if (indicator) indicator.remove();
+
+            if (!status) return; // Empty status = remove indicator
+
+            // Create new indicator
+            indicator = document.createElement('div');
+            indicator.id = 'settingsSaveIndicator';
+            indicator.style.cssText = `
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                padding: 8px 12px;
+                border-radius: 5px;
+                font-size: 12px;
+                font-weight: bold;
+                z-index: 10000;
+                transition: opacity 0.3s;
+            `;
+
+            if (status === 'saving') {
+                indicator.textContent = '💾 Saving settings...';
+                indicator.style.background = '#667eea';
+                indicator.style.color = 'white';
+            } else if (status === 'saved') {
+                indicator.textContent = '✅ Settings saved';
+                indicator.style.background = '#10b981';
+                indicator.style.color = 'white';
+                setTimeout(() => indicator.remove(), 2000);
+            } else if (status === 'loading') {
+                indicator.textContent = '📥 Loading settings...';
+                indicator.style.background = '#667eea';
+                indicator.style.color = 'white';
+            } else if (status === 'loaded') {
+                indicator.textContent = '✅ Settings loaded';
+                indicator.style.background = '#10b981';
+                indicator.style.color = 'white';
+                setTimeout(() => indicator.remove(), 2000);
+            } else if (status === 'error') {
+                indicator.textContent = '❌ Settings save failed';
+                indicator.style.background = '#ef4444';
+                indicator.style.color = 'white';
+                setTimeout(() => indicator.remove(), 3000);
+            }
+
+            document.body.appendChild(indicator);
         }
 
         function loadProgress(fileName) {
@@ -11191,8 +11814,6 @@
             learnedCount.textContent = learned;
             remainingCount.textContent = remaining;
             totalCount.textContent = total;
-
-            saveProgress(); // Save whenever stats update
         }
 
         // Pronounce source language word
@@ -11471,6 +12092,9 @@
             // Update button states
             prevBtn.disabled = currentIndex === 0;
             nextBtn.disabled = currentIndex === filteredCards.length - 1;
+
+            // Save progress after displaying card
+            saveProgress();
         }
 
         // Toggle English meaning visibility
@@ -11754,6 +12378,143 @@
             }
         }
 
+        // ============================================
+        // PROGRESS TRACKING & RESET FUNCTIONS
+        // ============================================
+
+        // Save current practice progress (position in cards)
+        // Saves to memory + localStorage (small data, no quota issues)
+        function saveProgress() {
+            if (!currentFileName) return;
+
+            const progressData = {
+                cardIndex: currentIndex,
+                transcriptIndex: transcriptCurrentIndex,
+                timestamp: Date.now(),
+                totalCards: filteredCards.length
+            };
+
+            // Update in-memory progress cache
+            progressDataCache[currentFileName] = progressData;
+
+            // Also save to localStorage as backup (survives page refresh)
+            // Progress is tiny data (<1KB), won't cause quota issues
+            try {
+                localStorage.setItem(`progress_${currentFileName}`, JSON.stringify(progressData));
+            } catch (e) {
+                // Silently fail if localStorage is full
+            }
+
+            // Progress also syncs to Firebase when flashcard data is saved
+            // (progressDataCache is included in Firebase sync structure)
+        }
+
+        // Load saved progress for current file
+        function loadProgress() {
+            if (!currentFileName) return null;
+
+            let progressData = null;
+
+            // 1. Check in-memory cache first (fastest)
+            if (progressDataCache[currentFileName]) {
+                progressData = progressDataCache[currentFileName];
+                console.log('📂 Progress loaded from memory:', progressData);
+            }
+            // 2. Fall back to localStorage (page refresh)
+            else {
+                try {
+                    const saved = localStorage.getItem(`progress_${currentFileName}`);
+                    if (saved) {
+                        progressData = JSON.parse(saved);
+                        progressDataCache[currentFileName] = progressData; // Update memory cache
+                        console.log('📂 Progress loaded from localStorage:', progressData);
+                    }
+                } catch (e) {
+                    // Ignore corrupted data
+                }
+            }
+
+            if (progressData) {
+                applyProgress(progressData);
+                return progressData;
+            }
+
+            console.log('No saved progress found for', currentFileName);
+            return null;
+        }
+
+        // Apply progress data to current session
+        function applyProgress(progressData) {
+            if (!progressData) return;
+
+            // Restore card mode position
+            if (typeof progressData.cardIndex === 'number' && progressData.cardIndex >= 0) {
+                currentIndex = Math.min(progressData.cardIndex, filteredCards.length - 1);
+                console.log('✓ Restored card position:', currentIndex);
+            }
+
+            // Restore transcript mode position
+            if (typeof progressData.transcriptIndex === 'number' && progressData.transcriptIndex >= 0) {
+                transcriptCurrentIndex = Math.min(progressData.transcriptIndex, filteredCards.length - 1);
+                console.log('✓ Restored transcript position:', transcriptCurrentIndex);
+            }
+
+            // Update UI to reflect restored position
+            if (flashcardViewMode === 'card') {
+                showFlashcard();
+            } else if (flashcardViewMode === 'transcript') {
+                // Update transcript navigation and highlight
+                updateTranscriptProgress();
+                highlightTranscriptPair(transcriptCurrentIndex);
+            }
+        }
+
+        // Reset to beginning - works for both card and transcript modes
+        function resetToBeginning(mode) {
+            if (mode === 'card') {
+                currentIndex = 0;
+                showFlashcard();
+                console.log('↺ Card mode reset to beginning');
+
+                // Stop autoplay if running
+                if (isAutoPlaying) {
+                    stopAutoPlay('manual');
+                }
+            } else if (mode === 'transcript') {
+                transcriptCurrentIndex = 0;
+                updateTranscriptDisplay();
+                console.log('↺ Transcript mode reset to beginning');
+
+                // Stop transcript playback if running
+                if (transcriptPlaying) {
+                    stopTranscriptPlayback();
+                }
+            }
+
+            // Save the reset progress
+            saveProgress();
+
+            // Show feedback
+            const message = mode === 'card' ?
+                'Reset to first card' :
+                'Reset to first transcript item';
+
+            // Update progress display if it exists
+            const progressEl = mode === 'card' ?
+                document.getElementById('progress') :
+                document.getElementById('transcriptProgress');
+
+            if (progressEl) {
+                const originalText = progressEl.textContent;
+                progressEl.textContent = `↺ ${message}`;
+                progressEl.style.color = '#06b6d4';
+                setTimeout(() => {
+                    progressEl.textContent = originalText;
+                    progressEl.style.color = '';
+                }, 2000);
+            }
+        }
+
         // Timer functions
         function startStudyTimer() {
             const duration = parseInt(document.getElementById('studyDuration').value);
@@ -11987,6 +12748,7 @@
         // Read extended content checkbox
         document.getElementById('readExtendedContent').addEventListener('change', (e) => {
             readExtendedContent = e.target.checked;
+            saveUserSettings(); // Auto-save settings
         });
 
         // Auto-play button
@@ -12001,17 +12763,20 @@
         // Auto-play English checkbox
         autoplayEnglishCheckbox.addEventListener('change', (e) => {
             autoplayEnglishEnabled = e.target.checked;
+            saveUserSettings(); // Auto-save settings
         });
 
         // Delay sliders
         delayBetweenSlider.addEventListener('input', (e) => {
             delayBetweenLangs = parseInt(e.target.value);
             delayBetweenValue.textContent = (delayBetweenLangs / 1000).toFixed(1) + 's';
+            saveUserSettings(); // Auto-save settings
         });
 
         delayNextSlider.addEventListener('input', (e) => {
             delayBeforeNext = parseInt(e.target.value);
             delayNextValue.textContent = (delayBeforeNext / 1000).toFixed(1) + 's';
+            saveUserSettings(); // Auto-save settings
         });
 
         // Voice selection handlers
@@ -12035,6 +12800,7 @@
             } else {
                 console.error('❌ Source voice not found at index:', e.target.value);
             }
+            saveUserSettings(); // Auto-save settings
         });
 
         document.getElementById('targetVoiceSelect').addEventListener('change', (e) => {
@@ -12057,6 +12823,7 @@
             } else {
                 console.error('❌ Target voice not found at index:', e.target.value);
             }
+            saveUserSettings(); // Auto-save settings
         });
 
         // Gender-based voice selection handlers - WRAPPED IN FUNCTION FOR DOMContentLoaded
@@ -12111,6 +12878,7 @@
                         }
                         updateVoiceInfo('source', sourceVoice);
                         console.log('Source voice changed to:', sourceVoice.name, '(Gender:', gender + ')');
+                        saveUserSettings(); // Auto-save settings
                     }
                 });
             }
@@ -12162,6 +12930,7 @@
                         }
                         updateVoiceInfo('target', targetVoice);
                         console.log('Target voice changed to:', targetVoice.name, '(Gender:', gender + ')');
+                        saveUserSettings(); // Auto-save settings
                     }
                 });
             }
@@ -12171,12 +12940,14 @@
         document.getElementById('speechRate').addEventListener('input', (e) => {
             speechRate = parseFloat(e.target.value);
             document.getElementById('speechRateValue').textContent = speechRate.toFixed(1) + 'x';
+            saveUserSettings(); // Auto-save settings
         });
 
         // Pitch handler
         document.getElementById('speechPitch').addEventListener('input', (e) => {
             speechPitch = parseFloat(e.target.value);
             document.getElementById('speechPitchValue').textContent = speechPitch.toFixed(1);
+            saveUserSettings(); // Auto-save settings
         });
 
         // Advanced features event listeners - WRAPPED IN FUNCTION FOR DOMContentLoaded
@@ -12191,6 +12962,7 @@
                 loopModeCheckbox.addEventListener('change', (e) => {
                     loopModeEnabled = e.target.checked;
                     console.log('Loop Mode:', loopModeEnabled);
+                    saveUserSettings(); // Auto-save settings
                 });
             }
 
@@ -12198,6 +12970,7 @@
                 repeatSourceSelect.addEventListener('change', (e) => {
                     repeatSourceCount = parseInt(e.target.value);
                     console.log('Repeat Source Count:', repeatSourceCount);
+                    saveUserSettings(); // Auto-save settings
                 });
             }
 
@@ -12205,6 +12978,7 @@
                 repeatTargetSelect.addEventListener('change', (e) => {
                     repeatTargetCount = parseInt(e.target.value);
                     console.log('Repeat Target Count:', repeatTargetCount);
+                    saveUserSettings(); // Auto-save settings
                 });
             }
 
@@ -12212,6 +12986,7 @@
                 studyTimerCheckbox.addEventListener('change', (e) => {
                     studyTimerEnabled = e.target.checked;
                     console.log('Study Timer:', studyTimerEnabled);
+                    saveUserSettings(); // Auto-save settings
                     if (!e.target.checked && timerInterval) {
                         stopAllTimers();
                     }
@@ -12222,9 +12997,28 @@
                 sleepTimerCheckbox.addEventListener('change', (e) => {
                     sleepTimerEnabled = e.target.checked;
                     console.log('Sleep Timer:', sleepTimerEnabled);
+                    saveUserSettings(); // Auto-save settings
                     if (!e.target.checked && timerInterval) {
                         stopAllTimers();
                     }
+                });
+            }
+
+            // Timer duration selects
+            const studyDurationSelect = document.getElementById('studyDuration');
+            const sleepDurationSelect = document.getElementById('sleepDuration');
+
+            if (studyDurationSelect) {
+                studyDurationSelect.addEventListener('change', (e) => {
+                    console.log('Study Duration changed to:', e.target.value, 'minutes');
+                    saveUserSettings(); // Auto-save settings
+                });
+            }
+
+            if (sleepDurationSelect) {
+                sleepDurationSelect.addEventListener('change', (e) => {
+                    console.log('Sleep Duration changed to:', e.target.value, 'minutes');
+                    saveUserSettings(); // Auto-save settings
                 });
             }
         }
@@ -12651,6 +13445,7 @@
 
             currentIndex = 0;
             showFlashcard();
+            saveUserSettings(); // Auto-save settings
         });
 
         // Remap columns button - show format selector again
@@ -12682,17 +13477,27 @@
 
             switch(e.key) {
                 case 'ArrowLeft':
-                    stopAutoPlay(); // Stop auto-play on manual navigation
-                    if (currentIndex > 0) {
-                        currentIndex--;
-                        showFlashcard();
+                    // Handle based on current mode
+                    if (flashcardViewMode === 'transcript') {
+                        previousTranscriptCard();
+                    } else {
+                        stopAutoPlay(); // Stop auto-play on manual navigation
+                        if (currentIndex > 0) {
+                            currentIndex--;
+                            showFlashcard();
+                        }
                     }
                     break;
                 case 'ArrowRight':
-                    stopAutoPlay(); // Stop auto-play on manual navigation
-                    if (currentIndex < filteredCards.length - 1) {
-                        currentIndex++;
-                        showFlashcard();
+                    // Handle based on current mode
+                    if (flashcardViewMode === 'transcript') {
+                        nextTranscriptCard();
+                    } else {
+                        stopAutoPlay(); // Stop auto-play on manual navigation
+                        if (currentIndex < filteredCards.length - 1) {
+                            currentIndex++;
+                            showFlashcard();
+                        }
                     }
                     break;
                 case ' ':
@@ -12898,7 +13703,16 @@
         function switchViewMode(mode) {
             console.log(`🔄 Switching to ${mode} mode`);
 
+            // IMPORTANT: Save current mode settings before switching
+            const oldMode = flashcardViewMode === 'transcript' ? 'transcriptMode' : 'cardMode';
+            captureCurrentSettings(oldMode);
+
+            // Switch to new mode
             flashcardViewMode = mode;
+
+            // Apply new mode settings
+            const newMode = mode === 'transcript' ? 'transcriptMode' : 'cardMode';
+            applySettingsToUI(newMode);
 
             const cardModeBtn = document.getElementById('cardModeBtn');
             const transcriptModeBtn = document.getElementById('transcriptModeBtn');
@@ -12915,6 +13729,7 @@
 
                 // Hide transcript view
                 transcriptView.style.display = 'none';
+                document.getElementById('transcriptNavigation').style.display = 'none';
 
                 // Update button states
                 cardModeBtn.classList.add('active');
@@ -12922,6 +13737,9 @@
 
                 // Stop any transcript playback
                 stopTranscriptPlayback();
+
+                // Show the current card (uses saved currentIndex)
+                showFlashcard();
 
             } else if (mode === 'transcript') {
                 // Hide card view
@@ -12931,6 +13749,7 @@
 
                 // Show transcript view
                 transcriptView.style.display = 'block';
+                document.getElementById('transcriptNavigation').style.display = 'flex';
 
                 // Update button states
                 cardModeBtn.classList.remove('active');
@@ -12938,7 +13757,14 @@
 
                 // Generate transcript from current flashcards
                 generateTranscriptView();
+
+                // Update transcript navigation numbers and highlight current position (uses saved transcriptCurrentIndex)
+                updateTranscriptProgress();
+                highlightTranscriptPair(transcriptCurrentIndex);
             }
+
+            // Save settings after mode switch
+            saveUserSettings();
         }
 
         /**
@@ -12976,9 +13802,10 @@
 
             // Add all flashcard pairs (using filteredCards to respect current filter)
             filteredCards.forEach((card, index) => {
+                const learnedBadge = card.learned ? '<span style="color: #10b981; font-weight: bold; margin-right: 5px;">✓</span>' : '';
                 html += `
                     <div class="transcript-pair" data-index="${index}" onclick="jumpToTranscriptSentence(${index})">
-                        <div class="transcript-text source">${card.lang1 || ''}</div>
+                        <div class="transcript-text source">${learnedBadge}${card.lang1 || ''}</div>
                         <div class="transcript-text target">${card.lang2 || ''}</div>
                     </div>
                 `;
@@ -13179,6 +14006,9 @@
             // Move to next card
             transcriptCurrentIndex++;
 
+            // Save progress after moving to next card
+            saveProgress();
+
             // Continue with next sentence
             playNextTranscriptSentence();
         }
@@ -13216,13 +14046,35 @@
                 voice: utterance.voice ? utterance.voice.name : 'default'
             });
 
+            // Event-driven completion: prevent double callbacks
+            let completed = false;
+            const safetyTimeout = setTimeout(() => {
+                if (!completed && callback) {
+                    console.log('⚠️ Transcript speech safety timeout triggered');
+                    completed = true;
+                    callback();
+                }
+            }, 30000); // 30 second safety timeout for very long text
+
             utterance.onend = () => {
-                if (callback) callback();
+                if (!completed) {
+                    completed = true;
+                    clearTimeout(safetyTimeout);
+                    console.log('✅ Transcript speech completed naturally');
+                    if (callback) callback();
+                }
             };
 
             utterance.onerror = (event) => {
-                console.error('❌ Transcript speech error:', event);
-                if (callback) callback();
+                if (!completed) {
+                    completed = true;
+                    clearTimeout(safetyTimeout);
+                    // "interrupted" error is normal when pausing/stopping, so don't log it as error
+                    if (event.error !== 'interrupted') {
+                        console.error('❌ Transcript speech error:', event);
+                    }
+                    if (callback) callback();
+                }
             };
 
             synth.speak(utterance);
@@ -13276,7 +14128,6 @@
             console.log('⏹️ Stopping transcript playback...');
 
             transcriptPlaying = false;
-            transcriptCurrentIndex = 0;
             synth.cancel();
 
             // Clear any pending timeouts
@@ -13335,6 +14186,22 @@
                 return;
             }
 
+            // Update navigation numbers (matching card mode)
+            const currentInputEl = document.getElementById('transcriptCurrentInput');
+            const totalCardsEl = document.getElementById('transcriptTotalCards');
+            const prevBtn = document.getElementById('transcriptPrevBtn');
+            const nextBtn = document.getElementById('transcriptNextBtn');
+
+            if (currentInputEl) {
+                currentInputEl.value = transcriptCurrentIndex + 1;
+                currentInputEl.max = filteredCards.length;
+            }
+            if (totalCardsEl) totalCardsEl.textContent = filteredCards.length;
+
+            // Update button states
+            if (prevBtn) prevBtn.disabled = transcriptCurrentIndex === 0;
+            if (nextBtn) nextBtn.disabled = transcriptCurrentIndex === filteredCards.length - 1;
+
             if (transcriptPlaying) {
                 progressEl.textContent = `Playing: ${transcriptCurrentIndex + 1} / ${filteredCards.length}`;
             } else if (transcriptCurrentIndex > 0) {
@@ -13342,6 +14209,102 @@
             } else {
                 progressEl.textContent = `Ready to play ${filteredCards.length} sentences - Press Space or click Play`;
             }
+        }
+
+        // Navigate to previous transcript card
+        function previousTranscriptCard() {
+            if (transcriptCurrentIndex > 0) {
+                transcriptCurrentIndex--;
+                updateTranscriptProgress();
+                highlightTranscriptPair(transcriptCurrentIndex);
+                saveProgress();
+                console.log('← Previous transcript card:', transcriptCurrentIndex + 1);
+            }
+        }
+
+        // Navigate to next transcript card
+        function nextTranscriptCard() {
+            if (transcriptCurrentIndex < filteredCards.length - 1) {
+                transcriptCurrentIndex++;
+                updateTranscriptProgress();
+                highlightTranscriptPair(transcriptCurrentIndex);
+                saveProgress();
+                console.log('→ Next transcript card:', transcriptCurrentIndex + 1);
+            }
+        }
+
+        // Event listeners for transcript navigation buttons
+        const transcriptPrevBtn = document.getElementById('transcriptPrevBtn');
+        const transcriptNextBtn = document.getElementById('transcriptNextBtn');
+
+        if (transcriptPrevBtn) {
+            transcriptPrevBtn.addEventListener('click', () => {
+                if (transcriptPlaying) stopTranscriptPlayback(); // Stop playback on manual navigation
+                previousTranscriptCard();
+            });
+        }
+
+        if (transcriptNextBtn) {
+            transcriptNextBtn.addEventListener('click', () => {
+                if (transcriptPlaying) stopTranscriptPlayback(); // Stop playback on manual navigation
+                nextTranscriptCard();
+            });
+        }
+
+        // Jump to specific card by entering card number in transcript mode
+        const transcriptCurrentInput = document.getElementById('transcriptCurrentInput');
+        let transcriptJumpTimeout = null;
+
+        if (transcriptCurrentInput) {
+            const jumpToTranscriptCard = () => {
+                if (transcriptPlaying) stopTranscriptPlayback(); // Stop playback on manual navigation
+                const cardNumber = parseInt(transcriptCurrentInput.value);
+
+                // Validate input
+                if (isNaN(cardNumber) || cardNumber < 1) {
+                    transcriptCurrentInput.value = transcriptCurrentIndex + 1;
+                    alert('⚠️ Please enter a valid card number (minimum: 1)');
+                    return;
+                }
+
+                if (cardNumber > filteredCards.length) {
+                    transcriptCurrentInput.value = transcriptCurrentIndex + 1;
+                    alert(`⚠️ Card number cannot exceed ${filteredCards.length}`);
+                    return;
+                }
+
+                // Jump to the card (convert to 0-based index)
+                transcriptCurrentIndex = cardNumber - 1;
+                updateTranscriptProgress();
+                highlightTranscriptPair(transcriptCurrentIndex);
+                saveProgress();
+                console.log('🎯 Jumped to transcript card:', transcriptCurrentIndex + 1);
+            };
+
+            // Auto-update as you type (with 800ms delay after you stop typing)
+            transcriptCurrentInput.addEventListener('input', () => {
+                // Clear previous timeout
+                if (transcriptJumpTimeout) clearTimeout(transcriptJumpTimeout);
+
+                // Set new timeout - updates 800ms after you stop typing
+                transcriptJumpTimeout = setTimeout(() => {
+                    jumpToTranscriptCard();
+                }, 800);
+            });
+
+            // Also handle Enter key for immediate jump
+            transcriptCurrentInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    if (transcriptJumpTimeout) clearTimeout(transcriptJumpTimeout);
+                    jumpToTranscriptCard();
+                }
+            });
+
+            // Handle blur (clicking outside) for immediate jump
+            transcriptCurrentInput.addEventListener('blur', () => {
+                if (transcriptJumpTimeout) clearTimeout(transcriptJumpTimeout);
+                jumpToTranscriptCard();
+            });
         }
 
         /**
@@ -13531,6 +14494,38 @@
                     }
                     break;
 
+                case 'KeyL':
+                    e.preventDefault();
+                    // Mark current transcript card as learned/unlearned
+                    if (filteredCards.length > 0) {
+                        const card = filteredCards[transcriptCurrentIndex];
+                        if (!card.learned) {
+                            // Mark as learned and apply spaced repetition
+                            const reviewData = calculateNextReview(card, 4);
+                            card.learned = true;
+                            card.repetitions = reviewData.repetitions;
+                            card.easeFactor = reviewData.easeFactor;
+                            card.interval = reviewData.interval;
+                            card.reviewDate = reviewData.reviewDate;
+                            console.log(`✓ Card ${transcriptCurrentIndex + 1} marked as learned`);
+                        } else {
+                            // Unmark as learned
+                            card.learned = false;
+                            card.repetitions = 0;
+                            card.interval = 1;
+                            card.reviewDate = null;
+                            console.log(`✗ Card ${transcriptCurrentIndex + 1} unmarked as learned`);
+                        }
+                        updateStats();
+                        saveProgress(); // Save position
+                        saveFlashcardsToCloud(); // Save flashcard data to cloud
+                        // Regenerate transcript to show updated learned status
+                        generateTranscriptView();
+                        updateTranscriptProgress();
+                        highlightTranscriptPair(transcriptCurrentIndex);
+                    }
+                    break;
+
                 case 'Escape':
                     e.preventDefault();
                     stopTranscriptPlayback();
@@ -13539,6 +14534,143 @@
         });
 
         console.log('✅ Transcript mode functions initialized!');
+
+        // ============================================
+        // PWA INSTALL PROMPT HANDLING
+        // ============================================
+
+        let deferredPrompt = null;
+
+        // Detect if app is installable
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('📱 PWA installable detected');
+
+            // Prevent the default mini-infobar
+            e.preventDefault();
+
+            // Store the event for later use
+            deferredPrompt = e;
+
+            // Show our custom install banner (but not if already dismissed)
+            const dismissedTime = localStorage.getItem('pwaInstallDismissed');
+            const now = Date.now();
+            const oneDayMs = 24 * 60 * 60 * 1000;
+
+            // Show banner if never dismissed OR dismissed more than 1 day ago
+            if (!dismissedTime || (now - parseInt(dismissedTime)) > oneDayMs) {
+                showInstallBanner();
+            }
+        });
+
+        // Show install banner
+        function showInstallBanner() {
+            const banner = document.getElementById('pwaInstallBanner');
+            if (banner) {
+                banner.style.display = 'block';
+                console.log('✅ Install banner shown');
+            }
+        }
+
+        // Install PWA
+        async function installPWA() {
+            // Check if running on iOS
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+            if (isIOS) {
+                // Show iOS-specific instructions
+                showIOSInstructions();
+                return;
+            }
+
+            if (!deferredPrompt) {
+                console.log('❌ Install prompt not available');
+                alert('Install is not available. Please use your browser\'s menu to install this app.');
+                return;
+            }
+
+            // Show the install prompt
+            deferredPrompt.prompt();
+
+            // Wait for user choice
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`PWA install choice: ${outcome}`);
+
+            if (outcome === 'accepted') {
+                console.log('✅ PWA installed successfully');
+            } else {
+                console.log('❌ PWA install declined');
+            }
+
+            // Clear the prompt
+            deferredPrompt = null;
+
+            // Hide banner
+            hideInstallBanner();
+        }
+
+        // Dismiss install banner
+        function dismissInstallBanner() {
+            hideInstallBanner();
+            // Remember dismissal for 1 day
+            localStorage.setItem('pwaInstallDismissed', Date.now().toString());
+            console.log('📌 Install banner dismissed');
+        }
+
+        // Hide install banner
+        function hideInstallBanner() {
+            const banner = document.getElementById('pwaInstallBanner');
+            if (banner) {
+                banner.style.display = 'none';
+            }
+        }
+
+        // Show iOS install instructions
+        function showIOSInstructions() {
+            const modal = document.getElementById('iosInstallModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                console.log('📱 iOS install instructions shown');
+            }
+        }
+
+        // Close iOS instructions
+        function closeIOSInstructions() {
+            const modal = document.getElementById('iosInstallModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            // Also hide the banner
+            hideInstallBanner();
+        }
+
+        // Check if already installed (running as PWA)
+        window.addEventListener('load', () => {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                                window.navigator.standalone === true;
+
+            if (isStandalone) {
+                console.log('✅ App running as PWA');
+                // Hide install banner if running as installed app
+                hideInstallBanner();
+            } else {
+                console.log('🌐 App running in browser');
+
+                // Check if on iOS and show banner with iOS instructions
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                if (isIOS) {
+                    // iOS doesn't fire beforeinstallprompt, so show banner manually
+                    const dismissedTime = localStorage.getItem('pwaInstallDismissed');
+                    const now = Date.now();
+                    const oneDayMs = 24 * 60 * 60 * 1000;
+
+                    if (!dismissedTime || (now - parseInt(dismissedTime)) > oneDayMs) {
+                        setTimeout(() => showInstallBanner(), 3000); // Show after 3 seconds
+                    }
+                }
+            }
+        });
+
+        console.log('✅ PWA install handlers initialized');
     </script>
 
     <!-- Focus Mode Overlay -->
